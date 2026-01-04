@@ -1,0 +1,106 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #1a1a1a;
+    color: white;
+}
+
+textarea, input, select {
+    background: #404040;
+    color: white;
+    border: 1px solid #555;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+input {
+    flex-grow: 1;
+    padding: 15px;
+    background: #0c0c0c;
+    border: none;
+    color: white;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.default-btn {
+    padding: 10px 20px;
+    background: #c07ac0;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.default-btn:hover { background: #ff25ff;}
+.default-btn:disabled { background: #555; cursor: not-allowed; }
+.reset-btn{
+    padding: 10px 20px;
+    background: #ff4444;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.reset-btn:hover{background: #ff0000;}
+#reset{
+    margin-top: 10vh;
+}
+.chat-area {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+    overflow-y: auto;
+}
+#chat-container {
+    height: 80vh;
+    width: 100%;
+    max-width: 700px;
+    margin-left: auto;      
+    margin-right: auto;
+    border: 2px solid #333;
+    background: #1a1919;
+    padding: 20px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
+
+.app-layout {
+    display: flex;
+    height: 100vh;
+}
+.sidebar {
+    width: 300px;
+    background-color: #2d2d2d;
+    padding: 20px;
+    border-right: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.message { margin-bottom: 15px; padding: 10px; border-radius: 5px; }
+.user { text-align: right; color: #fff; border-right: 3px solid #bafcca; }
+.assistant { text-align: left; color: #ecddec; border-left: 3px solid #d380d3; }
+#input-area {
+    display: flex;
+    width: 100%;
+    max-width: 800px;
+    gap: 10px;
+}

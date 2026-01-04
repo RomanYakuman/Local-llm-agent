@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.png">
+    <title>LLA</title>
+
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <h2>⚙️ SETTINGS</h2>
+        
+            <div class="setting-group">
+                <label>System Persona:</label>
+                <select id="prompt-select">
+                    </select>
+            </div>
+
+            <div class="setting-group">
+                <label>Edit Prompt:</label>
+                <textarea id="system-prompt-text" rows="6"></textarea>
+            </div>
+
+            <div class="setting-group">
+                <input type="text" id="new-prompt-name" placeholder="Name">
+                <button onclick="saveNewPrompt()" class="default-btn">💾 SAVE PRESET</button>
+                <button onclick="removePrompt()" class="reset-btn">🗑️ REMOVE PRESET</button>
+            </div>
+            <div class="setting-group">
+                <label>Temperature:</label>
+                <input type="number" id="temperature" min="0" max="2" step="0.1" value="0.7">
+            </div>
+            <div class="setting-group">
+                <label>Repeat Penalty:</span></label>
+                <input type="number" id="repeat-penalty" min="1" max="3" step="0.01" value="1.15">
+            </div>
+            <div class="setting-group">
+                <label>Mirostat:<input type="checkbox" id="mirostat"></label>
+            </div>
+            <button onclick="clearChat()" class="reset-btn" id="reset">🗑️ RESET CHAT</button>
+        </aside>
+
+        <main class="chat-area">
+            <div id="chat-container"></div>
+            
+            <div id="input-area">
+                <input type="text" id="user-input" placeholder="Write here" onkeypress="handleEnter(event)">
+                <button onclick="sendMessage()" class="default-btn" id="send-btn">SEND</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
