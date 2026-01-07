@@ -11,17 +11,35 @@ function handleEnter(e) {
     if (e.key === 'Enter') sendMessage();
 }
 
-let chatHistory = JSON.parse(localStorage.getItem('chat')) || [];
+var chatHistory = []
 
-window.onload = () => {
-    renderChat();
-    loadPrompts();
+async function get_chat_history(){    
+    try {
+        const response = await fetch("http://localhost:8000/history", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+        data = await response.json();
+        return data;
+    }
+    catch(error){
+        addMessage("Error: " + error.message, 'assistant');
+        return [];
+    }
+}
+async function initChat() {
+    chatHistory = await get_chat_history()
+    renderChat()
 }
 
+window.onload = () => {
+    initChat();
+    loadPrompts();
+}
 promptText.oninput = function() {
     updateSystemPrompt(this.value);
 }
-//renders chat from history saved in local storage
+//renders chat from db, suboptimal performance (clipping on chat rendering, needs to be updated)
 function renderChat() {
     const chatBox = document.getElementById('chat-container');
     chatBox.innerHTML = ''; 
@@ -37,20 +55,19 @@ function renderChat() {
 
     chatBox.scrollTop = chatBox.scrollHeight;
 }
-//sabes chat into local storage
-function saveChat() {
-    localStorage.setItem('chat', JSON.stringify(chatHistory));
-}
-//clears chat from local storage
-function clearChat() {
-    localStorage.removeItem('chat');
-    chatHistory = [{ role: 'system', content: chatHistory[0]['content']}];
-    localStorage.setItem('chat', JSON.stringify(chatHistory));
-    saveChat();
-    messages = document.getElementsByClassName("message");
-    Array.from(messages).forEach(msg => {
-        msg.remove()
-    });
+//calls db to clear chat + rerenders
+async function clearChat() {
+    try {
+        const response = await fetch("http://localhost:8000/reset", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+        response = await response.json();
+    }
+    catch(error){
+        addMessage("Error: " + error.message, 'assistant');
+    }
+    renderChat()
 }
 //load prompt presets from local storage if targetName != null changes selector's value to targetName
 function loadPrompts(targetName = null) {
@@ -81,14 +98,6 @@ function loadPrompts(targetName = null) {
     promptSelect.dispatchEvent(new Event('change'));
 }
 
-function updateSystemPrompt(newPrompt) {
-    if (chatHistory.length === 0 || chatHistory[0].role !== 'system') {
-        chatHistory.unshift({ role: 'system', content: newPrompt });
-    } else {
-        chatHistory[0].content = newPrompt;
-    }
-    saveChat();
-}
 //saves prompt preset into local storage, if preset name already exists - redacts existing preset
 function saveNewPrompt() {
     const name = promptName.value.trim();
@@ -132,7 +141,6 @@ async function sendMessage() {
     if (!text) return;
     userInput.value = '';
     chatHistory.push({ role: "user", content: text});
-    saveChat();
     renderChat();
     userInput.disabled = true;
     sendBtn.disabled = true;
@@ -143,7 +151,8 @@ async function sendMessage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
-                messages: chatHistory,
+                message: text,
+                user_system_prompt: promptText.value,
                 temperature: parseFloat(temperature_input.value),
                 repeat_penalty: parseFloat(repeat_penalty_input.value),
                 mirostat: parseInt(mirostat)
@@ -151,7 +160,6 @@ async function sendMessage() {
         });
         const data = await response.json();
         chatHistory.push(data);
-        saveChat();
         renderChat();
     } 
     catch (error) {
