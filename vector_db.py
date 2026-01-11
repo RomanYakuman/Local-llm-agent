@@ -8,10 +8,11 @@ from datetime import datetime
 #default embedding model for chroma is MiniLM-L6-v2
 client = chromadb.PersistentClient()
 
-collection = client.get_or_create_collection(name="chat_history")
+chat_collection_name = 'chat_history'
 
 #adding interaction to db
 def save_interaction_embedding(user_msg:str, assistant_msg:str):
+    collection = client.get_or_create_collection(name=chat_collection_name)
     now = datetime.now()
     #timestamp in the float format for metadata
     timestamp_float = now.timestamp()
@@ -25,6 +26,7 @@ def save_interaction_embedding(user_msg:str, assistant_msg:str):
 
 #searching similar messages to the query using cosine similarity
 def get_string_vector(query, res_count=2):
+    collection = client.get_or_create_collection(name=chat_collection_name)
     full_text = ''
     results = collection.query(
         query_texts=[query],
@@ -51,3 +53,12 @@ def get_memory_block(query, res_count=2):
         </relevant_memory>
         """
     return memory_block
+
+def vector_chat_reset():
+    try:
+        client.get_collection(chat_collection_name)
+    except ValueError:
+        # Collection does not exist
+        pass
+    else:
+        client.delete_collection(chat_collection_name)

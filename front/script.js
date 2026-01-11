@@ -6,6 +6,7 @@ const mirostat_checkbox = document.getElementById('mirostat');
 const promptSelect = document.getElementById('prompt-select');
 const promptText = document.getElementById('system-prompt-text');
 const promptName = document.getElementById('new-prompt-name');
+const chatBox = document.getElementById('chat-container');
 var savedPrompts = []
 function handleEnter(e) {
     if (e.key === 'Enter') sendMessage();
@@ -40,17 +41,18 @@ promptText.oninput = function() {
     updateSystemPrompt(this.value);
 }
 //renders chat from db, suboptimal performance (clipping on chat rendering, needs to be updated)
+function add_message(msg){
+    if(msg.role === 'system') return;
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+    messageDiv.classList.add(msg.role === 'user' ? 'user' : 'assistant');
+    messageDiv.innerText = msg.content;
+    chatBox.appendChild(messageDiv);
+}
 function renderChat() {
-    const chatBox = document.getElementById('chat-container');
     chatBox.innerHTML = ''; 
-
     chatHistory.forEach(msg => {
-        if(msg.role === 'system') return;
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message');
-        messageDiv.classList.add(msg.role === 'user' ? 'user' : 'assistant');
-        messageDiv.innerText = msg.content;
-        chatBox.appendChild(messageDiv);
+        add_message(msg);
     });
 
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -140,8 +142,7 @@ async function sendMessage() {
     const text = userInput.value.trim();
     if (!text) return;
     userInput.value = '';
-    chatHistory.push({ role: "user", content: text});
-    renderChat();
+    add_message({'content':text,'role':'user'})
     userInput.disabled = true;
     sendBtn.disabled = true;
     sendBtn.innerText = "THINKING...";
@@ -159,11 +160,10 @@ async function sendMessage() {
             })
         });
         const data = await response.json();
-        chatHistory.push(data);
-        renderChat();
+        add_message(data)
     } 
     catch (error) {
-        addMessage("Error: " + error.message, 'assistant');
+        add_message("Error: " + error.message, 'assistant');
         console.error(error);
     } finally {
         userInput.disabled = false;
