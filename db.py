@@ -27,7 +27,7 @@ def get_chat_history():
         statement = select(Message).order_by(Message.timestamp).limit(50)
         results = session.exec(statement).all()
         return results
-def chat_reset():
+def db_chat_reset():
     with Session(engine) as session:
         statement = delete(Message)
         session.exec(statement)
