@@ -7,13 +7,13 @@ CONFIG_FILE = 'config.json'
 print('\ninitializing model\n')
 system_prompt = """
 <core_instruction>
-CRITICAL PROTOCOL:
-    1. You are the assistant (role:assistant)
-    2. The user sends you requests (role:user)
-    3. BOUNDARIES:
-       - You MUST ONLY generate text for the assistant.
-       - When you have finished your turn, STOP immediately.
-       - You must always generate at least one word non-empty string response.
+    CRITICAL PROTOCOL:
+        1. You are the assistant (role:assistant)
+        2. The user sends you requests (role:user)
+        3. BOUNDARIES:
+            - You MUST ONLY generate text for the assistant.
+            - When you have finished your turn, STOP immediately.
+            - You must always generate at least one word non-empty string response.
 </core_instruction>
 <tools_library>
     You have the authority to invoke the following tools to solve user tasks.
@@ -22,10 +22,10 @@ CRITICAL PROTOCOL:
         2. SELECT: Choose the exact [COMMAND] from the list below.
         3. EXECUTE: Output the command in the JSON "action" field.
 
-    1. [COMMAND]: "test1"
-       - Description: Test.
-       - Trigger: only use test1 function if the user explicitly asks for it.
-       - Parameters: No.
+    1. [COMMAND]: "web_search"
+       - Description: Search the internet for relevant information. When searching for news or data that must be fresh, ALWAYS include the current year (e.g., 'Recent news 2026') in the query to avoid outdated historical data.
+       - Trigger: Use only if user asks to.
+       - Parameters: YES. Provide the search query string in the "action_input" field.
 
     2. [COMMAND]: "test 2"
        - Description: Test 2.
@@ -40,11 +40,15 @@ CRITICAL PROTOCOL:
        - Decision making process regarding the tool if needed.
     2. "action":
        - Only use tools in the situation specified in their Trigger.
-       - If no tool applies, output the empty string ''.
-    3. "response": 
+       - If no tool applies, output the empty string "".
+    3. "action_input":
+        - The argument for the tool.
+        - If action is "web_search", this must be the specific search query string (e.g. weather in Kyiv).
+        - If no action, leave empty string "".
+    4. "response": 
         - The final natural language reply to the user.
-        - User can only see your response.
-        - You have to always provide response .
+        - If you used "web_search", your response MUST be comprehensive and detailed, synthesize information from all sources.
+        - You have to always provide non-empty response.
         - Adopt the tone, style, and language provided at the start of the context.
         - If used any tools, specify their usage in the response
 </json_formatting_rules>
@@ -98,7 +102,7 @@ class llm_model:
             repeat_penalty=chat_data.repeat_penalty,
             #stream true to see the output as a stream in the console
             stream=True,
-            max_tokens=2048,
+            max_tokens=4096,
             #mirostat sampler algorithm heighetns the perplexity of the generated text, more perplexity = less repetition, but with more perplexity comes lower stability
             #0 = off, 2 = second version (on)
             mirostat_mode=chat_data.mirostat,
@@ -114,13 +118,14 @@ class llm_model:
                         "chain_of_thought": {"type": "string"},
                         "action":{"type":"string",
                         "enum": [
-                            "test1",
+                            "web_search",
                             "test 2",
                             ""
                         ]},
+                        "action_input":{"type":"string"},
                         "response": {"type":"string"},
                         },
-                    "required": ["chain_of_thought", "action", "response" ]
+                    "required": ["chain_of_thought", "action", "action_input","response" ]
                 }
             },
             stop=[
